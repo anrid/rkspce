@@ -55,7 +55,7 @@ func (b *Basket) Quantity(code string) (quantity int) {
 func (b *Basket) Dump() string {
 	row := func(code, special string, price float64) string {
 		priceStr := fmt.Sprintf("%.02f", price)
-		return fmt.Sprintf("%-12s%-18s%5s", code, special, priceStr)
+		return fmt.Sprintf("%-12s%-12s%11s", code, special, priceStr)
 	}
 
 	// Add headers.
