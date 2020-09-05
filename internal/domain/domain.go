@@ -1,6 +1,9 @@
 package domain
 
-import "math"
+import (
+	"errors"
+	"math"
+)
 
 // All our products.
 var (
@@ -10,6 +13,15 @@ var (
 	ProductMilk    = Product{"MK1", "Milk", 4.75}
 	ProductOatmeal = Product{"OM1", "Oatmeal", 3.69}
 )
+
+// Products lists all products available to our customers.
+var Products = []Product{
+	ProductChai,
+	ProductApples,
+	ProductCoffee,
+	ProductMilk,
+	ProductOatmeal,
+}
 
 // All our specials.
 var (
@@ -38,7 +50,7 @@ var (
 		"Purchase a bag of Oatmeal and get 50% off a bag of Apples",
 		ProductOatmeal,
 		ProductApples,
-		0,
+		1,
 		0.50,
 	}
 )
@@ -46,4 +58,26 @@ var (
 // Round float64 to nearest.
 func roundNearest(v float64) float64 {
 	return math.Round(v*100) / 100
+}
+
+// ErrNotFound is returned when some resource could not be found.
+var ErrNotFound = errors.New("not found")
+
+// GetProductByCode looks for a product with the given
+// code among all available products.
+func GetProductByCode(code string) (Product, error) {
+	for _, p := range Products {
+		if p.Code == code {
+			return p, nil
+		}
+	}
+	return Product{}, ErrNotFound
+}
+
+// ApplySpecials applies all specials to the given basket.
+func ApplySpecials(b *Basket) {
+	SpecialCoffee.Apply(b)
+	SpecialApples.Apply(b)
+	SpecialChai.Apply(b)
+	SpecialOatmeal.Apply(b)
 }

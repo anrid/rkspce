@@ -1,17 +1,5 @@
 package domain
 
-// Special is a special offer.
-type Special interface {
-	Code() string
-	Description() string
-	Apply(*Basket)
-}
-
-// FromSpecial creates a new basket item from a special.
-func FromSpecial(s Special, price float64) Item {
-	return Item{Code: s.Code(), Price: price, IsSpecial: true}
-}
-
 // SpecialBuyOneGetOneFree makes every other instance of
 // a given product free.
 type SpecialBuyOneGetOneFree struct {
@@ -20,35 +8,21 @@ type SpecialBuyOneGetOneFree struct {
 	p           Product
 }
 
-// Code ...
-func (s SpecialBuyOneGetOneFree) Code() string {
-	return s.code
-}
-
-// Description ...
-func (s SpecialBuyOneGetOneFree) Description() string {
-	return s.description
-}
-
 // Apply this special to the given basket.
 func (s SpecialBuyOneGetOneFree) Apply(b *Basket) {
-	nb := &Basket{}
 	var nextOneFree bool
 
 	for _, i := range b.Items {
-		nb.Add(i)
 		if i.Code == s.p.Code {
 			// Discount every other item of the same product code.
 			if nextOneFree {
-				// Make the current item free!
-				nb.Add(FromSpecial(s, -s.p.Price))
+				i.AddDiscount(s.code, -s.p.Price)
 				nextOneFree = false
 			} else {
 				nextOneFree = true
 			}
 		}
 	}
-	b.Items = nb.Items
 }
 
 // SpecialQuantityDiscount applies a discount to a product
@@ -61,16 +35,6 @@ type SpecialQuantityDiscount struct {
 	discount        float64
 }
 
-// Code ...
-func (s SpecialQuantityDiscount) Code() string {
-	return s.code
-}
-
-// Description ...
-func (s SpecialQuantityDiscount) Description() string {
-	return s.description
-}
-
 // Apply this special to the given basket.
 func (s SpecialQuantityDiscount) Apply(b *Basket) {
 	// Skip this special if we cannot find enough
@@ -79,15 +43,12 @@ func (s SpecialQuantityDiscount) Apply(b *Basket) {
 		return
 	}
 
-	nb := &Basket{}
 	for _, i := range b.Items {
-		nb.Add(i)
 		if i.Code == s.p.Code {
 			// Add a discount to the current item.
-			nb.Add(FromSpecial(s, -s.discount))
+			i.AddDiscount(s.code, -s.discount)
 		}
 	}
-	b.Items = nb.Items
 }
 
 // SpecialBuyOneGetOtherDiscounted will make some (other) product
@@ -101,16 +62,6 @@ type SpecialBuyOneGetOtherDiscounted struct {
 	discountPercentage float64
 }
 
-// Code ...
-func (s SpecialBuyOneGetOtherDiscounted) Code() string {
-	return s.code
-}
-
-// Description ...
-func (s SpecialBuyOneGetOtherDiscounted) Description() string {
-	return s.description
-}
-
 // Apply this special to the given basket.
 func (s SpecialBuyOneGetOtherDiscounted) Apply(b *Basket) {
 	// Skip this special if we cannot find enough of
@@ -122,9 +73,7 @@ func (s SpecialBuyOneGetOtherDiscounted) Apply(b *Basket) {
 	isLimited := s.limit > 0
 	limit := s.limit
 
-	nb := &Basket{}
 	for _, i := range b.Items {
-		nb.Add(i)
 		if i.Code == s.other.Code {
 			// Check if we need to limit the number of discounts given.
 			if isLimited {
@@ -137,8 +86,7 @@ func (s SpecialBuyOneGetOtherDiscounted) Apply(b *Basket) {
 			// Discount the current item.
 			discountedPrice := roundNearest(s.other.Price * s.discountPercentage)
 
-			nb.Add(FromSpecial(s, -discountedPrice))
+			i.AddDiscount(s.code, -discountedPrice)
 		}
 	}
-	b.Items = nb.Items
 }

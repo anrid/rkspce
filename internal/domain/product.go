@@ -9,6 +9,6 @@ type Product struct {
 }
 
 // ToItem creates a new basket item from this product.
-func (p Product) ToItem() Item {
-	return Item{Code: p.Code, Price: p.Price}
+func (p Product) ToItem() *Item {
+	return &Item{Code: p.Code, Price: p.Price}
 }
