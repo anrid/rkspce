@@ -51,8 +51,8 @@ func (s SpecialQuantityDiscount) Apply(b *Basket) {
 	}
 }
 
-// SpecialBuyOneGetOtherDiscounted will make some (other) product
-// free if a certain product is in the basket.
+// SpecialBuyOneGetOtherDiscounted will discount some other
+// product if a certain product is in the basket.
 type SpecialBuyOneGetOtherDiscounted struct {
 	code               string
 	description        string
